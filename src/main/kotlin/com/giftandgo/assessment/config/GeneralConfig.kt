@@ -6,19 +6,21 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.giftandgo.assessment.model.EntryFile
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 
 @Configuration
 class GeneralConfig {
 
-    @Bean("csvMapper")
-    fun csvOjectMapperConfig(): ObjectMapper {
+    @Primary
+    @Bean
+    fun csvObjectMapper(): ObjectMapper {
         val mapper = CsvMapper()
         mapper.registerModule(KotlinModule())
-        mapper.schemaFor(EntryFile::class.java)
+        mapper.schemaFor(EntryFile::class.java).withColumnSeparator('|')
         return mapper
     }
 
-    @Bean("jsonMapper")
+    @Bean
     fun jsonObjectMapper(): ObjectMapper {
         val mapper = ObjectMapper()
         mapper.registerModule(KotlinModule())
