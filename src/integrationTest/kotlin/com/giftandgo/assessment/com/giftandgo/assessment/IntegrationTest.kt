@@ -10,6 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @AutoConfigureMockMvc
@@ -38,5 +39,49 @@ class IntegrationTest {
             .andReturn().response.contentAsByteArray
 
         outputDataFile shouldBe expectedDataFile
+    }
+
+    @Test
+    fun `broken input entry file should return incorrect format 422 error`() {
+        val validEntryFile = MockMultipartFile(
+            "file", "EntryFile.txt", "text/plain",
+            this::class.java.getResourceAsStream("/input/brokenEntryFile.txt")!!.bufferedReader().readText()
+                .toByteArray()
+        )
+
+        mockMvc.perform(
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+        ).andExpect(status().isUnprocessableEntity)
+            .andExpect(content().string("Incorrect format found"))
+    }
+
+    @Test
+    fun `misnamed input entry file should return incorrect format 422 error`() {
+        val validEntryFile = MockMultipartFile(
+            "file", "Yo.txt", "text/plain",
+            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                .toByteArray()
+        )
+
+        mockMvc.perform(
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+        ).andExpect(status().isUnprocessableEntity)
+            .andExpect(content().string("Invalid file name provided"))
+
+    }
+
+    @Test
+    fun `invalid input entry file should return incorrect format 422 error`() {
+        val validEntryFile = MockMultipartFile(
+            "file", "EntryFile.txt", "text/plain",
+            this::class.java.getResourceAsStream("/input/invalidEntryFile.txt")!!.bufferedReader().readText()
+                .toByteArray()
+        )
+
+        mockMvc.perform(
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+        ).andExpect(status().isUnprocessableEntity)
+            .andExpect(content().string("Format must follow [Likes] [Something]"))
+
     }
 }

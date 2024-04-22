@@ -2,4 +2,4 @@ spring:
   application: name=assessment
 
 application:
-  enable-entryfile-validation: true
+  enable-entryFile-validation: true

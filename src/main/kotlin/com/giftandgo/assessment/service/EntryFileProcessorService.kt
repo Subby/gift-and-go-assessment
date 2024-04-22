@@ -1,6 +1,7 @@
 package com.giftandgo.assessment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.giftandgo.assessment.config.ApplicationConfigProperties
 import com.giftandgo.assessment.model.*
 import io.konform.validation.Invalid
 import io.konform.validation.Valid
@@ -16,36 +17,49 @@ private const val VALID_FILE_NAME = "EntryFile.txt"
 @Service
 class EntryFileProcessorService(
     @Qualifier("csvObjectMapper") val csvObjectMapper: ObjectMapper,
-    @Qualifier("jsonObjectMapper") val jsonObjectMapper: ObjectMapper
+    @Qualifier("jsonObjectMapper") val jsonObjectMapper: ObjectMapper,
+    val applicationConfigProperties: ApplicationConfigProperties,
 ) : FileProcessorService {
     override fun processFile(file: MultipartFile): FileProcessResult {
-        if (!file.originalFilename.equals(VALID_FILE_NAME)) {
+        if (applicationConfigProperties.enableEntryFileValidation && file.originalFilename.equals(VALID_FILE_NAME)) {
             return FileProcessError(errors = listOf("Invalid file name provided"))
         }
         try {
-            val validatedEntryFileValues = csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
-                .readValues<EntryFile>(file.bytes).readAll().map { it.validateEntryFile() }
+            val entryFileValues = csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
+                .readValues<EntryFile>(file.bytes).readAll()
 
-            val (validEntryFies, invalidEntryFiles) = validatedEntryFileValues.partition { it is Valid }
+            if (applicationConfigProperties.enableEntryFileValidation) {
+                val (validEntryFies, invalidEntryFiles) = entryFileValues.map { it.validateEntryFile() }
+                    .partition { it is Valid }
 
-            if (invalidEntryFiles.isNotEmpty()) {
-                val invalidEntryFileValidationMessages =
-                    validatedEntryFileValues.asSequence().filter { it is Invalid }.map { it.errors }.flatten()
-                        .map { it.message }.toList()
-                return FileProcessError(errors = invalidEntryFileValidationMessages)
-            }
+                if (invalidEntryFiles.isNotEmpty()) {
+                    val invalidEntryFileValidationMessages =
+                        invalidEntryFiles.asSequence().filter { it is Invalid }.map { it.errors }.flatten()
+                            .map { it.message }.toList()
+                    return FileProcessError(errors = invalidEntryFileValidationMessages)
+                }
 
-            val mappedDataFiles = validEntryFies.map { it as Valid }.map { it.value.toDataFile() }
-
-            return FileProcessSuccess(
-                inputStream = InputStreamResource(
-                    ByteArrayInputStream(
-                        jsonObjectMapper.writeValueAsBytes(
-                            mappedDataFiles
+                return FileProcessSuccess(
+                    inputStream = InputStreamResource(
+                        ByteArrayInputStream(
+                            jsonObjectMapper.writeValueAsBytes(
+                                validEntryFies.map { it as Valid }.map { it.value.toDataFile() }
+                            )
                         )
                     )
                 )
-            )
+            } else {
+                return FileProcessSuccess(
+                    inputStream = InputStreamResource(
+                        ByteArrayInputStream(
+                            jsonObjectMapper.writeValueAsBytes(
+                                entryFileValues.map { it.toDataFile() }
+                            )
+                        )
+                    )
+                )
+            }
+
         } catch (exception: Exception) {
             return FileProcessError(errors = listOf("Incorrect format found"))
         }
