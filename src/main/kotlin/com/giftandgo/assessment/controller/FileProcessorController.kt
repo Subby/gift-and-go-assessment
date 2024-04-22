@@ -10,17 +10,17 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 
-@Controller("/v1/")
+@Controller
 class FileProcessorController(
     private val outcomeFileProcessorService: FileProcessorService
 ) {
 
-    @PostMapping(name = "/processFile", consumes = ["multipart/form-data"])
-    fun processFile(@RequestParam("File") file: MultipartFile): ResponseEntity<Any> {
-        outcomeFileProcessorService.processFile(file.inputStream).let {
+    @PostMapping("/processFile")
+    fun processFile(@RequestParam("file") file: MultipartFile): ResponseEntity<Any> {
+        outcomeFileProcessorService.processFile(file).let {
             when (it) {
                 is FileProcessError -> {
-                    return ResponseEntity.badRequest().body(it.errors.joinToString(separator = "\n"))
+                    return ResponseEntity.unprocessableEntity().body(it.errors.joinToString(separator = "\n"))
                 }
                 is FileProcessSuccess -> {
                     return ResponseEntity.ok()

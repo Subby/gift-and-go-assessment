@@ -1,8 +1,8 @@
 package com.giftandgo.assessment.service
 
 import com.giftandgo.assessment.model.FileProcessResult
-import java.io.InputStream
+import org.springframework.web.multipart.MultipartFile
 
 interface FileProcessorService {
-    fun processFile(fileInputStream: InputStream): FileProcessResult
+    fun processFile(file: MultipartFile): FileProcessResult
 }
