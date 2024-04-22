@@ -11,6 +11,8 @@ class RequestInteceptor: HandlerInterceptor {
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val currentTimestamp = LocalDateTime.now()
         val ip = request.remoteAddr
+        val uri = request.requestURI
+
         return super.preHandle(request, response, handler)
     }
 
@@ -20,6 +22,7 @@ class RequestInteceptor: HandlerInterceptor {
         handler: Any,
         modelAndView: ModelAndView?
     ) {
+        val responseStatus = response.status
         super.postHandle(request, response, handler, modelAndView)
     }
 

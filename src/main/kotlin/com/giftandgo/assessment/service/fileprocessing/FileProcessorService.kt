@@ -1,4 +1,4 @@
-package com.giftandgo.assessment.service
+package com.giftandgo.assessment.service.fileprocessing
 
 import com.giftandgo.assessment.model.FileProcessResult
 import org.springframework.web.multipart.MultipartFile

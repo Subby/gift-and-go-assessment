@@ -1,2 +1,11 @@
 application:
   enable-entry-file-validation: true
+  ip-api-url: "http://ip-api.com"
+  ip-blocked-countries:
+    - China
+    - Spain
+    - USA
+  ip-blocked-isps:
+    - AWS
+    - GCP
+    - Azure

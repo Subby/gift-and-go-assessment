@@ -1,4 +1,4 @@
-package com.giftandgo.assessment.service
+package com.giftandgo.assessment.service.fileprocessing
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.giftandgo.assessment.config.ApplicationConfigProps
@@ -10,7 +10,6 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayInputStream
-
 
 private const val VALID_FILE_NAME = "EntryFile.txt"
 
