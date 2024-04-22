@@ -1,7 +1,7 @@
 package com.giftandgo.assessment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.giftandgo.assessment.config.ApplicationConfigProperties
+import com.giftandgo.assessment.config.ApplicationConfigProps
 import com.giftandgo.assessment.model.*
 import io.konform.validation.Invalid
 import io.konform.validation.Valid
@@ -18,17 +18,17 @@ private const val VALID_FILE_NAME = "EntryFile.txt"
 class EntryFileProcessorService(
     @Qualifier("csvObjectMapper") val csvObjectMapper: ObjectMapper,
     @Qualifier("jsonObjectMapper") val jsonObjectMapper: ObjectMapper,
-    val applicationConfigProperties: ApplicationConfigProperties,
+    val applicationConfigProps: ApplicationConfigProps,
 ) : FileProcessorService {
     override fun processFile(file: MultipartFile): FileProcessResult {
-        if (applicationConfigProperties.enableEntryFileValidation && file.originalFilename.equals(VALID_FILE_NAME)) {
+        if (applicationConfigProps.enableEntryFileValidation && !file.originalFilename.equals(VALID_FILE_NAME)) {
             return FileProcessError(errors = listOf("Invalid file name provided"))
         }
         try {
             val entryFileValues = csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
                 .readValues<EntryFile>(file.bytes).readAll()
 
-            if (applicationConfigProperties.enableEntryFileValidation) {
+            if (applicationConfigProps.enableEntryFileValidation) {
                 val (validEntryFies, invalidEntryFiles) = entryFileValues.map { it.validateEntryFile() }
                     .partition { it is Valid }
 

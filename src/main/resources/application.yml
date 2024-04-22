@@ -1,5 +1,2 @@
-spring:
-  application: name=assessment
-
 application:
-  enable-entryFile-validation: true
+  enable-entry-file-validation: true
