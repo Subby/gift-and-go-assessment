@@ -1,4 +1,4 @@
-package com.giftandgo.assessment.model
+package com.giftandgo.assessment.model.requestverification
 
 
 sealed interface RequestVerificationResult

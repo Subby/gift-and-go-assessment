@@ -1,4 +1,4 @@
-package com.giftandgo.assessment.model
+package com.giftandgo.assessment.model.fileprocessing
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import io.konform.validation.Validation

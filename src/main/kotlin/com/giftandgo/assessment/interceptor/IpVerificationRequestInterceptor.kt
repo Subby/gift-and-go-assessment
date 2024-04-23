@@ -6,7 +6,7 @@ import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
 import java.time.LocalDateTime
 //TODO: More specific name
-class RequestInteceptor: HandlerInterceptor {
+class IpVerificationRequestInterceptor: HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val currentTimestamp = LocalDateTime.now()

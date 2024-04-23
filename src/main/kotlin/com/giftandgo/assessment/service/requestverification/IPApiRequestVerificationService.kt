@@ -2,10 +2,9 @@ package com.giftandgo.assessment.service.requestverification
 
 import com.giftandgo.assessment.client.IPApiClient
 import com.giftandgo.assessment.config.ApplicationConfigProps
-import com.giftandgo.assessment.model.IPApiResponse
-import com.giftandgo.assessment.model.RequestVerificationFailure
-import com.giftandgo.assessment.model.RequestVerificationResult
-import com.giftandgo.assessment.model.RequestVerificationSuccess
+import com.giftandgo.assessment.model.requestverification.RequestVerificationFailure
+import com.giftandgo.assessment.model.requestverification.RequestVerificationResult
+import com.giftandgo.assessment.model.requestverification.RequestVerificationSuccess
 import org.springframework.stereotype.Service
 
 @Service
