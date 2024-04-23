@@ -1,19 +1,33 @@
 package com.giftandgo.assessment.interceptor
 
+import com.giftandgo.assessment.model.requestverification.RequestVerificationFailure
+import com.giftandgo.assessment.model.requestverification.RequestVerificationSuccess
+import com.giftandgo.assessment.service.requestverification.IPApiRequestVerificationService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.lang.Nullable
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
+import java.lang.Exception
 import java.time.LocalDateTime
+
 //TODO: More specific name
-class IpVerificationRequestInterceptor: HandlerInterceptor {
+class IpVerificationRequestInterceptor(private val requestVerificationService: IPApiRequestVerificationService) :
+    HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val currentTimestamp = LocalDateTime.now()
-        val ip = request.remoteAddr
-        val uri = request.requestURI
+        request.setAttribute("requestStartTime", LocalDateTime.now())
+        requestVerificationService.verifyRequestForIp(request.remoteAddr).let {
+            when (it) {
+                is RequestVerificationSuccess -> {
+                    return super.preHandle(request, response, handler)
+                }
+                is RequestVerificationFailure -> {
+                    TODO()
+                }
+            }
+        }
 
-        return super.preHandle(request, response, handler)
     }
 
     override fun postHandle(
@@ -22,10 +36,19 @@ class IpVerificationRequestInterceptor: HandlerInterceptor {
         handler: Any,
         modelAndView: ModelAndView?
     ) {
-        val responseStatus = response.status
+
         super.postHandle(request, response, handler, modelAndView)
     }
 
+    override fun afterCompletion(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+        @Nullable ex: Exception?
+    ) {
+        val uri = request.requestURI
+        val responseStatus = response.status
+    }
 
 
 }
