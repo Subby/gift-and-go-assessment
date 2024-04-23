@@ -1,6 +1,14 @@
 package com.giftandgo.assessment.com.giftandgo.assessment
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
+import com.marcinziolo.kotlin.wiremock.equalTo
+import com.marcinziolo.kotlin.wiremock.get
+import com.marcinziolo.kotlin.wiremock.returns
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -8,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -20,6 +30,11 @@ class IntegrationTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+    @AfterEach
+    fun cleardown() {
+        wiremock.resetAll()
+    }
+
     @Test
     fun `valid input entry file should return correct data file`() {
         val validEntryFile = MockMultipartFile(
@@ -31,6 +46,8 @@ class IntegrationTest {
         val expectedDataFile =
             this::class.java.getResourceAsStream("/output/validDataFile.json")!!.bufferedReader().readText()
                 .toByteArray()
+
+        queueSuccessfulIPApiResponse()
 
         val outputDataFile = mockMvc.perform(
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
@@ -49,6 +66,8 @@ class IntegrationTest {
                 .toByteArray()
         )
 
+        queueSuccessfulIPApiResponse()
+
         mockMvc.perform(
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isUnprocessableEntity)
@@ -63,11 +82,12 @@ class IntegrationTest {
                 .toByteArray()
         )
 
+        queueSuccessfulIPApiResponse()
+
         mockMvc.perform(
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Invalid file name provided"))
-
     }
 
     @Test
@@ -78,10 +98,109 @@ class IntegrationTest {
                 .toByteArray()
         )
 
+        queueSuccessfulIPApiResponse()
+
         mockMvc.perform(
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Format must follow [Likes] [Something]"))
+    }
+
+    @Test
+    fun `blocked ISP should return 403 error`() {
+        val validEntryFile = MockMultipartFile(
+            "file", "EntryFile.txt", "text/plain",
+            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                .toByteArray()
+        )
+
+        queueBlockedISPApiResponse()
+
+        mockMvc.perform(
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+        ).andExpect(status().isForbidden)
+            .andExpect(content().string("Request ISP is blocked"))
 
     }
+
+    @Test
+    fun `blocked country should return 403 error`() {
+        val validEntryFile = MockMultipartFile(
+            "file", "EntryFile.txt", "text/plain",
+            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                .toByteArray()
+        )
+
+        queueBlockedCountryApiResponse()
+
+        mockMvc.perform(
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+        ).andExpect(status().isForbidden)
+            .andExpect(content().string("Request Country is blocked"))
+
+    }
+
+    private fun queueSuccessfulIPApiResponse() {
+        val successfulResponseContent =
+            this::class.java.getResourceAsStream("/responses/successfulResponse.json")!!.bufferedReader().readText()
+        wiremock.get {
+            url equalTo "/json/127.0.0.1"
+        } returns {
+            header = "Content-Type" to "application/json"
+            statusCode = 200
+            body = successfulResponseContent
+        }
+    }
+
+    private fun queueBlockedISPApiResponse() {
+        val blockedISPResponse =
+            this::class.java.getResourceAsStream("/responses/blockedISPResponse.json")!!.bufferedReader().readText()
+        wiremock.get {
+            url equalTo "/json/127.0.0.1"
+        } returns {
+            header = "Content-Type" to "application/json"
+            statusCode = 200
+            body = blockedISPResponse
+        }
+    }
+
+    private fun queueBlockedCountryApiResponse() {
+        val blockedCountryResponse =
+            this::class.java.getResourceAsStream("/responses/blockedCountryResponse.json")!!.bufferedReader().readText()
+        wiremock.get {
+            url equalTo "/json/127.0.0.1"
+        } returns {
+            header = "Content-Type" to "application/json"
+            statusCode = 200
+            body = blockedCountryResponse
+        }
+    }
+
+
+
+    companion object {
+        private val wiremock: WireMockServer = WireMockServer(options().dynamicPort())
+
+        @JvmStatic
+        @BeforeAll
+        fun beforeAll() {
+            wiremock.start()
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun afterAll() {
+            wiremock.stop()
+        }
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun setupConfigProps(registry: DynamicPropertyRegistry) {
+            registry.add("application.ip-api-url") {
+                wiremock.baseUrl()
+            }
+        }
+    }
 }
+
+

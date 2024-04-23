@@ -15,7 +15,7 @@ class IPApiRequestVerificationService(val ipApiClient: IPApiClient, val applicat
         ipApiClient.testIp(ip).let { (country, isp, countryCode) ->
             if(applicationConfigProps.ipBlockedIsps.contains(isp)) {
                 return RequestVerificationFailure(reason = "Request ISP is blocked")
-            } else if(applicationConfigProps.ipBlockedIsps.contains(country)) {
+            } else if(applicationConfigProps.ipBlockedCountries.contains(country)) {
                 return RequestVerificationFailure(reason = "Request Country is blocked")
             } else {
                 return RequestVerificationSuccess(requestCountryCode = countryCode, requestIsp = isp)
