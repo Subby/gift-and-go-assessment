@@ -1,6 +1,19 @@
 # Gift & Go Assessment
 
-## Improvements
+This is the Gift & Go assessment submission.
+
+The acceptance criteria for the mandatory and additional tasks have been implemented.
+
+
+## Running
+
+### Running with Docker Compose
+
+### Running tests
+
+
+
+## Potential improvement Improvements
 * Errors can be enums
 * Integration test for Client
 * Add some logging
