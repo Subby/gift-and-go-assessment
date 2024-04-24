@@ -10,12 +10,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class WebMvcConfig(
     val requestVerificationService: IPApiRequestVerificationService,
-    val requestRecordService: RequestRecordService
+    val requestRecordService: RequestRecordService,
 ) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(IpVerificationRequestInterceptor(requestVerificationService, requestRecordService))
             .addPathPatterns("/processFile")
         super.addInterceptors(registry)
     }
-
 }

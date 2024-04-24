@@ -19,7 +19,6 @@ import org.springframework.mock.web.MockMultipartFile
 import java.util.*
 
 class EntryFileProcessorServiceTest {
-
     private val csvObjectMapper = mockk<ObjectMapper>()
     private val jsonObjectMapper = mockk<ObjectMapper>()
     private val applicationConfigProps = mockk<ApplicationConfigProps>()
@@ -28,7 +27,7 @@ class EntryFileProcessorServiceTest {
         EntryFileProcessorService(
             csvObjectMapper = csvObjectMapper,
             jsonObjectMapper = jsonObjectMapper,
-            applicationConfigProps = applicationConfigProps
+            applicationConfigProps = applicationConfigProps,
         )
 
     @Test
@@ -40,8 +39,8 @@ class EntryFileProcessorServiceTest {
                 "somefile",
                 "somefile.txt",
                 null,
-                "some-contents".toByteArray()
-            )
+                "some-contents".toByteArray(),
+            ),
         ) shouldBe FileProcessError(errors = listOf("Invalid file name provided"))
 
         verify { csvObjectMapper wasNot called }
@@ -52,17 +51,18 @@ class EntryFileProcessorServiceTest {
     fun `processFile returns error when validation is enabled and file data is invalid`() {
         val mockObjectReader = mockk<ObjectReader>()
         val mappingIterator = mockk<MappingIterator<EntryFile>>()
-        val entryFileValues = listOf(
-            EntryFile(
-                uuid = UUID.randomUUID(),
-                id = "",
-                name = "",
-                likes = "",
-                transport = "",
-                averageSpeed = -0.01,
-                topSpeed = -0.01
+        val entryFileValues =
+            listOf(
+                EntryFile(
+                    uuid = UUID.randomUUID(),
+                    id = "",
+                    name = "",
+                    likes = "",
+                    transport = "",
+                    averageSpeed = -0.01,
+                    topSpeed = -0.01,
+                ),
             )
-        )
 
         every { applicationConfigProps.enableEntryFileValidation } returns true
         every { csvObjectMapper.readerFor(EntryFile::class.java) } returns mockObjectReader
@@ -75,17 +75,18 @@ class EntryFileProcessorServiceTest {
                 "somefile",
                 "EntryFile.txt",
                 null,
-                "some-contents".toByteArray()
-            )
+                "some-contents".toByteArray(),
+            ),
         ).let {
             it as FileProcessError
-            it.errors shouldContainAll listOf(
-                "Format must follow [digit]X[digit]D",
-                "Format must follow [First Name] [Last Name]",
-                "Format must follow [Likes] [Something]",
-                "must be at least '0.0'",
-                "must be at least '0.0'"
-            )
+            it.errors shouldContainAll
+                listOf(
+                    "Format must follow [digit]X[digit]D",
+                    "Format must follow [First Name] [Last Name]",
+                    "Format must follow [Likes] [Something]",
+                    "must be at least '0.0'",
+                    "must be at least '0.0'",
+                )
         }
 
         verify { jsonObjectMapper wasNot called }
@@ -95,17 +96,18 @@ class EntryFileProcessorServiceTest {
     fun `processFile returns success when validation is enabled and file data is valid`() {
         val mockObjectReader = mockk<ObjectReader>()
         val mappingIterator = mockk<MappingIterator<EntryFile>>()
-        val entryFileValues = listOf(
-            EntryFile(
-                uuid = UUID.randomUUID(),
-                id = "1X1D",
-                name = "Kurt Angle",
-                likes = "Likes Pineapples",
-                transport = "Rides Bicycles",
-                averageSpeed = 0.01,
-                topSpeed = 0.01
+        val entryFileValues =
+            listOf(
+                EntryFile(
+                    uuid = UUID.randomUUID(),
+                    id = "1X1D",
+                    name = "Kurt Angle",
+                    likes = "Likes Pineapples",
+                    transport = "Rides Bicycles",
+                    averageSpeed = 0.01,
+                    topSpeed = 0.01,
+                ),
             )
-        )
 
         every { applicationConfigProps.enableEntryFileValidation } returns true
         every { csvObjectMapper.readerFor(EntryFile::class.java) } returns mockObjectReader
@@ -114,14 +116,13 @@ class EntryFileProcessorServiceTest {
         every { mappingIterator.readAll() } returns entryFileValues
         every { jsonObjectMapper.writeValueAsBytes(any()) } returns "yo".toByteArray()
 
-
         entryFileProcessorService.processFile(
             MockMultipartFile(
                 "somefile",
                 "EntryFile.txt",
                 null,
-                "some-contents".toByteArray()
-            )
+                "some-contents".toByteArray(),
+            ),
         ).let {
             it as FileProcessSuccess
             it.inputStream.inputStream.readAllBytes() shouldBe "yo".toByteArray()
@@ -132,17 +133,18 @@ class EntryFileProcessorServiceTest {
     fun `processFile returns success when validation is disable and file data is invalid`() {
         val mockObjectReader = mockk<ObjectReader>()
         val mappingIterator = mockk<MappingIterator<EntryFile>>()
-        val entryFileValues = listOf(
-            EntryFile(
-                uuid = UUID.randomUUID(),
-                id = "",
-                name = "",
-                likes = "",
-                transport = "",
-                averageSpeed = -0.01,
-                topSpeed = -0.01
+        val entryFileValues =
+            listOf(
+                EntryFile(
+                    uuid = UUID.randomUUID(),
+                    id = "",
+                    name = "",
+                    likes = "",
+                    transport = "",
+                    averageSpeed = -0.01,
+                    topSpeed = -0.01,
+                ),
             )
-        )
 
         every { applicationConfigProps.enableEntryFileValidation } returns false
         every { csvObjectMapper.readerFor(EntryFile::class.java) } returns mockObjectReader
@@ -156,8 +158,8 @@ class EntryFileProcessorServiceTest {
                 "somefile",
                 "EntryFile.txt",
                 null,
-                "some-contents".toByteArray()
-            )
+                "some-contents".toByteArray(),
+            ),
         ).let {
             it as FileProcessSuccess
             it.inputStream.inputStream.readAllBytes() shouldBe "yo".toByteArray()

@@ -12,11 +12,12 @@ import org.springframework.web.multipart.MultipartFile
 
 @Controller
 class FileProcessorController(
-    private val outcomeFileProcessorService: FileProcessorService
+    private val outcomeFileProcessorService: FileProcessorService,
 ) {
-
     @PostMapping("/processFile")
-    fun processFile(@RequestParam("file") file: MultipartFile): ResponseEntity<Any> {
+    fun processFile(
+        @RequestParam("file") file: MultipartFile,
+    ): ResponseEntity<Any> {
         outcomeFileProcessorService.processFile(file).let {
             when (it) {
                 is FileProcessError -> {

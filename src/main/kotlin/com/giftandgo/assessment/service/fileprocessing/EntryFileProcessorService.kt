@@ -25,12 +25,14 @@ class EntryFileProcessorService(
             return FileProcessError(errors = listOf("Invalid file name provided"))
         }
         try {
-            val entryFileValues = csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
-                .readValues<EntryFile>(file.bytes).readAll()
+            val entryFileValues =
+                csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
+                    .readValues<EntryFile>(file.bytes).readAll()
 
             if (applicationConfigProps.enableEntryFileValidation) {
-                val (validEntryFies, invalidEntryFiles) = entryFileValues.map { it.validateEntryFile() }
-                    .partition { it is Valid }
+                val (validEntryFies, invalidEntryFiles) =
+                    entryFileValues.map { it.validateEntryFile() }
+                        .partition { it is Valid }
 
                 if (invalidEntryFiles.isNotEmpty()) {
                     val invalidEntryFileValidationMessages =
@@ -40,26 +42,27 @@ class EntryFileProcessorService(
                 }
 
                 return FileProcessSuccess(
-                    inputStream = InputStreamResource(
-                        ByteArrayInputStream(
-                            jsonObjectMapper.writeValueAsBytes(
-                                validEntryFies.map { it as Valid }.map { it.value.toDataFile() }
-                            )
-                        )
-                    )
+                    inputStream =
+                        InputStreamResource(
+                            ByteArrayInputStream(
+                                jsonObjectMapper.writeValueAsBytes(
+                                    validEntryFies.map { it as Valid }.map { it.value.toDataFile() },
+                                ),
+                            ),
+                        ),
                 )
             } else {
                 return FileProcessSuccess(
-                    inputStream = InputStreamResource(
-                        ByteArrayInputStream(
-                            jsonObjectMapper.writeValueAsBytes(
-                                entryFileValues.map { it.toDataFile() }
-                            )
-                        )
-                    )
+                    inputStream =
+                        InputStreamResource(
+                            ByteArrayInputStream(
+                                jsonObjectMapper.writeValueAsBytes(
+                                    entryFileValues.map { it.toDataFile() },
+                                ),
+                            ),
+                        ),
                 )
             }
-
         } catch (exception: Exception) {
             return FileProcessError(errors = listOf("Incorrect format found"))
         }

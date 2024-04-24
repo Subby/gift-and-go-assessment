@@ -1,6 +1,5 @@
 package com.giftandgo.assessment.config
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -15,10 +14,8 @@ import javax.sql.DataSource
 @EnableJdbcRepositories("com.giftandgo.assessment.repository")
 @Configuration
 class DataSourceConfig : AbstractJdbcConfiguration() {
-
-
     @Bean
-    fun dataSource(env: Environment) : DataSource {
+    fun dataSource(env: Environment): DataSource {
         val dataSource = DriverManagerDataSource()
         dataSource.setDriverClassName(env.getProperty("spring.datasource.driver-class-name")!!)
         dataSource.url = env.getProperty("spring.datasource.url")
@@ -28,8 +25,7 @@ class DataSourceConfig : AbstractJdbcConfiguration() {
     }
 
     @Bean
-    fun namedParameterJdbcOperations(dataSource: DataSource): NamedParameterJdbcTemplate =
-        NamedParameterJdbcTemplate(dataSource)
+    fun namedParameterJdbcOperations(dataSource: DataSource): NamedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
     @Bean
     fun transactionManager(dataSource: DataSource): TransactionManager = DataSourceTransactionManager(dataSource)

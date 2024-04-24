@@ -15,28 +15,27 @@ import org.springframework.mock.web.MockHttpServletResponse
 import java.time.LocalDateTime
 
 class IpVerificationRequestInterceptorTest {
-
-
     private val requestVerificationService = mockk<RequestVerificationService>(relaxed = true)
     private val requestRecordService = mockk<RequestRecordService>(relaxed = true)
 
-    private val ipVerificationRequestInterceptor = IpVerificationRequestInterceptor(
-        requestVerificationService = requestVerificationService,
-        requestRecordService = requestRecordService
-    )
+    private val ipVerificationRequestInterceptor =
+        IpVerificationRequestInterceptor(
+            requestVerificationService = requestVerificationService,
+            requestRecordService = requestRecordService,
+        )
 
     @Test
     fun `preHandle should forward request and record when ip verification succeeds`() {
-        every { requestVerificationService.verifyRequestForIp("127.0.0.1") } returns RequestVerificationSuccess(
-            requestCountryCode = "GB",
-            requestIsp = "GCP"
-        )
-
+        every { requestVerificationService.verifyRequestForIp("127.0.0.1") } returns
+            RequestVerificationSuccess(
+                requestCountryCode = "GB",
+                requestIsp = "GCP",
+            )
 
         ipVerificationRequestInterceptor.preHandle(
             request = MockHttpServletRequest(),
             response = MockHttpServletResponse(),
-            handler = String()
+            handler = String(),
         ) shouldBe true
 
         verify(exactly = 0) { requestRecordService.recordRequest(any(RequestRecord::class)) }
@@ -44,15 +43,16 @@ class IpVerificationRequestInterceptorTest {
 
     @Test
     fun `preHandle should stop request and record when ip verification fails`() {
-        every { requestVerificationService.verifyRequestForIp("127.0.0.1") } returns RequestVerificationFailure(
-            requestCountryCode = "GB",
-            reason = "The country is blocked!",
-            requestIsp = "Sky"
-        )
+        every { requestVerificationService.verifyRequestForIp("127.0.0.1") } returns
+            RequestVerificationFailure(
+                requestCountryCode = "GB",
+                reason = "The country is blocked!",
+                requestIsp = "Sky",
+            )
         ipVerificationRequestInterceptor.preHandle(
             request = MockHttpServletRequest(),
             response = MockHttpServletResponse(),
-            handler = String()
+            handler = String(),
         ) shouldBe false
 
         verify { requestRecordService.recordRequest(any(RequestRecord::class)) }
@@ -69,10 +69,9 @@ class IpVerificationRequestInterceptorTest {
             request = mockHttpServletRequest,
             response = MockHttpServletResponse(),
             handler = String(),
-            ex = null
+            ex = null,
         )
 
         verify { requestRecordService.recordRequest(any(RequestRecord::class)) }
     }
-
 }

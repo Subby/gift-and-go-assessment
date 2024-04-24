@@ -16,14 +16,16 @@ private const val requestStartTimeAttributeName = "requestStartTime"
 private const val requestCountryCodeAttributeName = "requestCountryCode"
 private const val requestISPAttributeName = "requestISP"
 
-
 class IpVerificationRequestInterceptor(
     private val requestVerificationService: RequestVerificationService,
-    private val requestRecordService: RequestRecordService
+    private val requestRecordService: RequestRecordService,
 ) :
     HandlerInterceptor {
-
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+    override fun preHandle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+    ): Boolean {
         request.setAttribute(requestStartTimeAttributeName, LocalDateTime.now())
         requestVerificationService.verifyRequestForIp(request.remoteAddr).let {
             when (it) {
@@ -47,21 +49,20 @@ class IpVerificationRequestInterceptor(
                             requestIP = request.remoteAddr,
                             countryCode = it.requestCountryCode,
                             timeLapsed = ChronoUnit.MILLIS.between(requestStartTime, LocalDateTime.now()).toInt(),
-                            requestISP = it.requestIsp
-                        )
+                            requestISP = it.requestIsp,
+                        ),
                     )
                     return false
                 }
             }
         }
-
     }
 
     override fun afterCompletion(
         request: HttpServletRequest,
         response: HttpServletResponse,
         handler: Any,
-        @Nullable ex: Exception?
+        @Nullable ex: Exception?,
     ) {
         val currentDateTime = LocalDateTime.now()
         val requestStartTime = request.getAttribute(requestStartTimeAttributeName) as LocalDateTime
@@ -77,9 +78,7 @@ class IpVerificationRequestInterceptor(
                 countryCode = requestCountryCode,
                 timeLapsed = ChronoUnit.MILLIS.between(requestStartTime, currentDateTime).toInt(),
                 requestISP = requestIsp,
-            )
+            ),
         )
     }
-
-
 }

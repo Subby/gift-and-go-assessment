@@ -26,5 +26,5 @@ data class RequestRecord(
     @Column("country_code")
     val countryCode: String,
     @Column("time_lapsed")
-    val timeLapsed: Int
+    val timeLapsed: Int,
 )

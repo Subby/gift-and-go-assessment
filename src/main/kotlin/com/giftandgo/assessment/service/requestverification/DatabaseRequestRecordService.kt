@@ -5,7 +5,7 @@ import com.giftandgo.assessment.repository.RequestRecordRepository
 import org.springframework.stereotype.Service
 
 @Service
-class DatabaseRequestRecordService(val requestRecordRepository: RequestRecordRepository): RequestRecordService {
+class DatabaseRequestRecordService(val requestRecordRepository: RequestRecordRepository) : RequestRecordService {
     override fun recordRequest(requestRecord: RequestRecord) {
         requestRecordRepository.save(requestRecord)
     }
