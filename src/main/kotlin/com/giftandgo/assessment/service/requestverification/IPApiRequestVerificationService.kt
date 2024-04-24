@@ -8,15 +8,25 @@ import com.giftandgo.assessment.model.requestverification.RequestVerificationSuc
 import org.springframework.stereotype.Service
 
 @Service
-//tODO: Make this and other vals private?
-class IPApiRequestVerificationService(val ipApiClient: IPApiClient, val applicationConfigProps: ApplicationConfigProps): RequestVerificationService {
+class IPApiRequestVerificationService(
+    val ipApiClient: IPApiClient,
+    val applicationConfigProps: ApplicationConfigProps
+) : RequestVerificationService {
 
-    override fun verifyRequestForIp(ip: String): RequestVerificationResult = //TODO: How do we handle errors here?
+    override fun verifyRequestForIp(ip: String): RequestVerificationResult =
         ipApiClient.testIp(ip).let { (country, isp, countryCode) ->
-            if(applicationConfigProps.ipBlockedIsps.contains(isp)) {
-                return RequestVerificationFailure(reason = "Request ISP is blocked", requestCountryCode = countryCode)
-            } else if(applicationConfigProps.ipBlockedCountries.contains(country)) {
-                return RequestVerificationFailure(reason = "Request Country is blocked", requestCountryCode = countryCode)
+            if (applicationConfigProps.ipBlockedIsps.contains(isp)) {
+                return RequestVerificationFailure(
+                    reason = "Request ISP is blocked",
+                    requestCountryCode = countryCode,
+                    requestIsp = isp
+                )
+            } else if (applicationConfigProps.ipBlockedCountries.contains(country)) {
+                return RequestVerificationFailure(
+                    reason = "Request Country is blocked",
+                    requestCountryCode = countryCode,
+                    requestIsp = isp
+                )
             } else {
                 return RequestVerificationSuccess(requestCountryCode = countryCode, requestIsp = isp)
             }

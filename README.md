@@ -18,3 +18,4 @@ The acceptance criteria for the mandatory and additional tasks have been impleme
 * Integration test for Client
 * Add some logging
 * Proper separation of config - everything right now is under `application`
+* Unit tests do not cover verify all possible side effects

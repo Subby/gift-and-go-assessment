@@ -80,6 +80,7 @@ class IntegrationTest {
                 it.responseCode shouldBe 200
                 it.requestIP shouldBe "127.0.0.1"
                 it.countryCode shouldBe "GB"
+                it.requestISP shouldBe "Sky"
                 it.timeLapsed shouldBeLessThan 8000
             }
         }
@@ -140,6 +141,7 @@ class IntegrationTest {
                 it.responseCode shouldBe 422
                 it.requestIP shouldBe "127.0.0.1"
                 it.countryCode shouldBe "GB"
+                it.requestISP shouldBe "Sky"
                 it.timeLapsed shouldBeLessThan 8000
             }
         }
@@ -169,6 +171,7 @@ class IntegrationTest {
                 it.responseCode shouldBe 422
                 it.requestIP shouldBe "127.0.0.1"
                 it.countryCode shouldBe "GB"
+                it.requestISP shouldBe "Sky"
                 it.timeLapsed shouldBeLessThan 8000
             }
         }
@@ -198,6 +201,7 @@ class IntegrationTest {
                 it.responseCode shouldBe 403
                 it.requestIP shouldBe "127.0.0.1"
                 it.countryCode shouldBe "GB"
+                it.requestISP shouldBe "GCP"
                 it.timeLapsed shouldBeLessThan 8000
             }
         }
@@ -226,6 +230,7 @@ class IntegrationTest {
                 it.timeStamp shouldBeBefore LocalDateTime.now()
                 it.responseCode shouldBe 403
                 it.requestIP shouldBe "127.0.0.1"
+                it.requestISP shouldBe "Sky"
                 it.countryCode shouldBe "GB"
                 it.timeLapsed shouldBeLessThan 8000
             }

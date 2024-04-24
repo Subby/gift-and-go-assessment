@@ -21,6 +21,8 @@ data class RequestRecord(
     val responseCode: Short,
     @Column("request_ip")
     val requestIP: String,
+    @Column("request_isp")
+    val requestISP: String,
     @Column("country_code")
     val countryCode: String,
     @Column("time_lapsed")

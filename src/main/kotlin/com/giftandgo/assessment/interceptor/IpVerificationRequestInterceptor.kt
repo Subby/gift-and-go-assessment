@@ -9,13 +9,12 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.lang.Nullable
 import org.springframework.web.servlet.HandlerInterceptor
-import org.springframework.web.servlet.ModelAndView
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 private const val requestStartTimeAttributeName = "requestStartTime"
 private const val requestCountryCodeAttributeName = "requestCountryCode"
+private const val requestISPAttributeName = "requestISP"
 
 
 class IpVerificationRequestInterceptor(
@@ -30,6 +29,7 @@ class IpVerificationRequestInterceptor(
             when (it) {
                 is RequestVerificationSuccess -> {
                     request.setAttribute(requestCountryCodeAttributeName, it.requestCountryCode)
+                    request.setAttribute(requestISPAttributeName, it.requestIsp)
                     return super.preHandle(request, response, handler)
                 }
 
@@ -46,7 +46,8 @@ class IpVerificationRequestInterceptor(
                             responseCode = response.status.toShort(),
                             requestIP = request.remoteAddr,
                             countryCode = it.requestCountryCode,
-                            timeLapsed = ChronoUnit.MILLIS.between(requestStartTime, LocalDateTime.now()).toInt()
+                            timeLapsed = ChronoUnit.MILLIS.between(requestStartTime, LocalDateTime.now()).toInt(),
+                            requestISP = it.requestIsp
                         )
                     )
                     return false
@@ -65,6 +66,7 @@ class IpVerificationRequestInterceptor(
         val currentDateTime = LocalDateTime.now()
         val requestStartTime = request.getAttribute(requestStartTimeAttributeName) as LocalDateTime
         val requestCountryCode = request.getAttribute(requestCountryCodeAttributeName) as String
+        val requestIsp = request.getAttribute(requestISPAttributeName) as String
         requestRecordService.recordRequest(
             RequestRecord(
                 id = null,
@@ -73,7 +75,8 @@ class IpVerificationRequestInterceptor(
                 responseCode = response.status.toShort(),
                 requestIP = request.remoteAddr,
                 countryCode = requestCountryCode,
-                timeLapsed = ChronoUnit.MILLIS.between(requestStartTime, currentDateTime).toInt()
+                timeLapsed = ChronoUnit.MILLIS.between(requestStartTime, currentDateTime).toInt(),
+                requestISP = requestIsp,
             )
         )
     }
