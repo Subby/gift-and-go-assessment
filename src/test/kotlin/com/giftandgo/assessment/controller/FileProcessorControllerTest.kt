@@ -9,7 +9,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatusCode
@@ -27,7 +26,9 @@ class FileProcessorControllerTest {
 
     @Test
     fun `processFile returns unprocessable entity when processing error occurs`() {
-        every { fileProcessorService.processFile(mockMultipartFile) } returns FileProcessError(errors = listOf("Invalid file name provided"))
+        every { fileProcessorService.processFile(mockMultipartFile) } returns (
+            FileProcessError(errors = listOf("Invalid file name provided"))
+        )
 
         fileProcessorController.processFile(mockMultipartFile).let {
             it.statusCode shouldBe HttpStatusCode.valueOf(422)

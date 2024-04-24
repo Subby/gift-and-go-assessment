@@ -16,7 +16,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockMultipartFile
-import java.util.*
+import java.util.UUID
 
 class EntryFileProcessorServiceTest {
     private val csvObjectMapper = mockk<ObjectMapper>()

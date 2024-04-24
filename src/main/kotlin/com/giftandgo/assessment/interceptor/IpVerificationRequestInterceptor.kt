@@ -12,9 +12,9 @@ import org.springframework.web.servlet.HandlerInterceptor
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-private const val requestStartTimeAttributeName = "requestStartTime"
-private const val requestCountryCodeAttributeName = "requestCountryCode"
-private const val requestISPAttributeName = "requestISP"
+private const val REQUEST_START_TIME_ATTRIBUTE_NAME = "requestStartTime"
+private const val REQUEST_COUNTRY_ATTRIBUTE_NAME = "requestCountryCode"
+private const val REQUEST_ISP_ATTRIBUTE_NAME = "requestISP"
 
 class IpVerificationRequestInterceptor(
     private val requestVerificationService: RequestVerificationService,
@@ -26,17 +26,17 @@ class IpVerificationRequestInterceptor(
         response: HttpServletResponse,
         handler: Any,
     ): Boolean {
-        request.setAttribute(requestStartTimeAttributeName, LocalDateTime.now())
+        request.setAttribute(REQUEST_START_TIME_ATTRIBUTE_NAME, LocalDateTime.now())
         requestVerificationService.verifyRequestForIp(request.remoteAddr).let {
             when (it) {
                 is RequestVerificationSuccess -> {
-                    request.setAttribute(requestCountryCodeAttributeName, it.requestCountryCode)
-                    request.setAttribute(requestISPAttributeName, it.requestIsp)
+                    request.setAttribute(REQUEST_COUNTRY_ATTRIBUTE_NAME, it.requestCountryCode)
+                    request.setAttribute(REQUEST_ISP_ATTRIBUTE_NAME, it.requestIsp)
                     return super.preHandle(request, response, handler)
                 }
 
                 is RequestVerificationFailure -> {
-                    val requestStartTime = request.getAttribute(requestStartTimeAttributeName) as LocalDateTime
+                    val requestStartTime = request.getAttribute(REQUEST_START_TIME_ATTRIBUTE_NAME) as LocalDateTime
                     response.status = 403
                     response.writer.write(it.reason)
                     response.writer.flush()
@@ -65,9 +65,9 @@ class IpVerificationRequestInterceptor(
         @Nullable ex: Exception?,
     ) {
         val currentDateTime = LocalDateTime.now()
-        val requestStartTime = request.getAttribute(requestStartTimeAttributeName) as LocalDateTime
-        val requestCountryCode = request.getAttribute(requestCountryCodeAttributeName) as String
-        val requestIsp = request.getAttribute(requestISPAttributeName) as String
+        val requestStartTime = request.getAttribute(REQUEST_START_TIME_ATTRIBUTE_NAME) as LocalDateTime
+        val requestCountryCode = request.getAttribute(REQUEST_COUNTRY_ATTRIBUTE_NAME) as String
+        val requestIsp = request.getAttribute(REQUEST_ISP_ATTRIBUTE_NAME) as String
         requestRecordService.recordRequest(
             RequestRecord(
                 id = null,
