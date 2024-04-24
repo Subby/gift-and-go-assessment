@@ -14,9 +14,9 @@ class IPApiRequestVerificationService(val ipApiClient: IPApiClient, val applicat
     override fun verifyRequestForIp(ip: String): RequestVerificationResult = //TODO: How do we handle errors here?
         ipApiClient.testIp(ip).let { (country, isp, countryCode) ->
             if(applicationConfigProps.ipBlockedIsps.contains(isp)) {
-                return RequestVerificationFailure(reason = "Request ISP is blocked")
+                return RequestVerificationFailure(reason = "Request ISP is blocked", requestCountryCode = countryCode)
             } else if(applicationConfigProps.ipBlockedCountries.contains(country)) {
-                return RequestVerificationFailure(reason = "Request Country is blocked")
+                return RequestVerificationFailure(reason = "Request Country is blocked", requestCountryCode = countryCode)
             } else {
                 return RequestVerificationSuccess(requestCountryCode = countryCode, requestIsp = isp)
             }

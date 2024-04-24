@@ -1,6 +1,6 @@
 CREATE TABLE record_request
 (
-    id            BIGINT PRIMARY KEY,
+    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
     uuid          VARCHAR(255) NOT NULL,
     uri           VARCHAR(255) NOT NULL,
     time_stamp    TIMESTAMP    NOT NULL,

@@ -1,11 +1,18 @@
 package com.giftandgo.assessment.com.giftandgo.assessment
 
+import com.giftandgo.assessment.repository.RequestRecordRepository
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.marcinziolo.kotlin.wiremock.equalTo
 import com.marcinziolo.kotlin.wiremock.get
 import com.marcinziolo.kotlin.wiremock.returns
+import io.kotest.matchers.comparables.shouldBeLessThan
+import io.kotest.matchers.date.shouldBeBefore
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import org.awaitility.kotlin.atMost
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilAsserted
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -23,6 +30,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multi
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testcontainers.containers.MySQLContainer
+import java.time.Duration
+import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -31,9 +40,13 @@ class IntegrationTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+    @Autowired
+    private lateinit var requestRecordRepository: RequestRecordRepository
+
     @AfterEach
     fun cleardown() {
         wiremock.resetAll()
+        requestRecordRepository.deleteAll()
     }
 
     @Test
@@ -57,6 +70,20 @@ class IntegrationTest {
             .andReturn().response.contentAsByteArray
 
         outputDataFile shouldBe expectedDataFile
+
+        await atMost Duration.ofSeconds(5) untilAsserted {
+            requestRecordRepository.findAll().first().let {
+                it.id shouldNotBe null
+                it.uuid shouldNotBe null
+                it.uri shouldBe "/processFile"
+                it.timeStamp shouldBeBefore LocalDateTime.now()
+                it.responseCode shouldBe 200
+                it.requestIP shouldBe "127.0.0.1"
+                it.countryCode shouldBe "GB"
+                it.timeLapsed shouldBeLessThan 8000
+            }
+        }
+
     }
 
     @Test
@@ -73,6 +100,20 @@ class IntegrationTest {
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Incorrect format found"))
+
+        await atMost Duration.ofSeconds(5) untilAsserted {
+            requestRecordRepository.findAll().first().let {
+                it.id shouldNotBe null
+                it.uuid shouldNotBe null
+                it.uri shouldBe "/processFile"
+                it.timeStamp shouldBeBefore LocalDateTime.now()
+                it.responseCode shouldBe 422
+                it.requestIP shouldBe "127.0.0.1"
+                it.countryCode shouldBe "GB"
+                it.timeLapsed shouldBeLessThan 8000
+            }
+        }
+
     }
 
     @Test
@@ -89,6 +130,19 @@ class IntegrationTest {
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Invalid file name provided"))
+
+        await atMost Duration.ofSeconds(5) untilAsserted {
+            requestRecordRepository.findAll().first().let {
+                it.id shouldNotBe null
+                it.uuid shouldNotBe null
+                it.uri shouldBe "/processFile"
+                it.timeStamp shouldBeBefore LocalDateTime.now()
+                it.responseCode shouldBe 422
+                it.requestIP shouldBe "127.0.0.1"
+                it.countryCode shouldBe "GB"
+                it.timeLapsed shouldBeLessThan 8000
+            }
+        }
     }
 
     @Test
@@ -105,6 +159,19 @@ class IntegrationTest {
             multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Format must follow [Likes] [Something]"))
+
+        await atMost Duration.ofSeconds(5) untilAsserted {
+            requestRecordRepository.findAll().first().let {
+                it.id shouldNotBe null
+                it.uuid shouldNotBe null
+                it.uri shouldBe "/processFile"
+                it.timeStamp shouldBeBefore LocalDateTime.now()
+                it.responseCode shouldBe 422
+                it.requestIP shouldBe "127.0.0.1"
+                it.countryCode shouldBe "GB"
+                it.timeLapsed shouldBeLessThan 8000
+            }
+        }
     }
 
     @Test
@@ -122,6 +189,18 @@ class IntegrationTest {
         ).andExpect(status().isForbidden)
             .andExpect(content().string("Request ISP is blocked"))
 
+        await atMost Duration.ofSeconds(5) untilAsserted {
+            requestRecordRepository.findAll().first().let {
+                it.id shouldNotBe null
+                it.uuid shouldNotBe null
+                it.uri shouldBe "/processFile"
+                it.timeStamp shouldBeBefore LocalDateTime.now()
+                it.responseCode shouldBe 403
+                it.requestIP shouldBe "127.0.0.1"
+                it.countryCode shouldBe "GB"
+                it.timeLapsed shouldBeLessThan 8000
+            }
+        }
     }
 
     @Test
@@ -139,6 +218,18 @@ class IntegrationTest {
         ).andExpect(status().isForbidden)
             .andExpect(content().string("Request Country is blocked"))
 
+        await atMost Duration.ofSeconds(5) untilAsserted {
+            requestRecordRepository.findAll().first().let {
+                it.id shouldNotBe null
+                it.uuid shouldNotBe null
+                it.uri shouldBe "/processFile"
+                it.timeStamp shouldBeBefore LocalDateTime.now()
+                it.responseCode shouldBe 403
+                it.requestIP shouldBe "127.0.0.1"
+                it.countryCode shouldBe "GB"
+                it.timeLapsed shouldBeLessThan 8000
+            }
+        }
     }
 
     private fun queueSuccessfulIPApiResponse() {
