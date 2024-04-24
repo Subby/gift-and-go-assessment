@@ -8,7 +8,7 @@ import java.util.UUID
 @Table("record_request")
 data class RequestRecord(
     @Id
-    val id: Long,
+    val id: Long?,
     val uuid: UUID = UUID.randomUUID(),
     val uri: String,
     val timeStamp: LocalDateTime,

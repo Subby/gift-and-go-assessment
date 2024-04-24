@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.testcontainers.containers.MySQLContainer
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -179,26 +180,30 @@ class IntegrationTest {
 
 
     companion object {
-        private val wiremock: WireMockServer = WireMockServer(options().dynamicPort())
+        private val wiremock = WireMockServer(options().dynamicPort())
+        private val databaseContainer = MySQLContainer("mysql:8.3.0").withDatabaseName("assessment")
 
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
             wiremock.start()
+            databaseContainer.start()
         }
 
         @JvmStatic
         @AfterAll
         fun afterAll() {
             wiremock.stop()
+            databaseContainer.stop()
         }
 
         @JvmStatic
         @DynamicPropertySource
         fun setupConfigProps(registry: DynamicPropertyRegistry) {
-            registry.add("application.ip-api-url") {
-                wiremock.baseUrl()
-            }
+            registry.add("application.ip-api-url", wiremock::baseUrl)
+            registry.add("spring.datasource.url", databaseContainer::getJdbcUrl)
+            registry.add("spring.datasource.username", databaseContainer::getUsername)
+            registry.add("spring.datasource.password", databaseContainer::getPassword)
         }
     }
 }
