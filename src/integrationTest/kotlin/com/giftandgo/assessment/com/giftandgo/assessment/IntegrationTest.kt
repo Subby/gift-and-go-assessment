@@ -36,7 +36,6 @@ import java.time.LocalDateTime
 @AutoConfigureMockMvc
 @SpringBootTest
 class IntegrationTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -51,11 +50,14 @@ class IntegrationTest {
 
     @Test
     fun `valid input entry file should return correct data file`() {
-        val validEntryFile = MockMultipartFile(
-            "file", "EntryFile.txt", "text/plain",
-            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
-                .toByteArray()
-        )
+        val validEntryFile =
+            MockMultipartFile(
+                "file",
+                "EntryFile.txt",
+                "text/plain",
+                this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                    .toByteArray(),
+            )
 
         val expectedDataFile =
             this::class.java.getResourceAsStream("/output/validDataFile.json")!!.bufferedReader().readText()
@@ -63,11 +65,12 @@ class IntegrationTest {
 
         queueSuccessfulIPApiResponse()
 
-        val outputDataFile = mockMvc.perform(
-            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
-        ).andExpect(status().isOk)
-            .andExpect { it.response.getHeader(HttpHeaders.CONTENT_DISPOSITION) shouldBe "attachment; filename=OutcomeFile.json" }
-            .andReturn().response.contentAsByteArray
+        val outputDataFile =
+            mockMvc.perform(
+                multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA),
+            ).andExpect(status().isOk)
+                .andExpect { it.response.getHeader(HttpHeaders.CONTENT_DISPOSITION) shouldBe "attachment; filename=OutcomeFile.json" }
+                .andReturn().response.contentAsByteArray
 
         outputDataFile shouldBe expectedDataFile
 
@@ -84,21 +87,23 @@ class IntegrationTest {
                 it.timeLapsed shouldBeLessThan 8000
             }
         }
-
     }
 
     @Test
     fun `broken input entry file should return incorrect format 422 error`() {
-        val validEntryFile = MockMultipartFile(
-            "file", "EntryFile.txt", "text/plain",
-            this::class.java.getResourceAsStream("/input/brokenEntryFile.txt")!!.bufferedReader().readText()
-                .toByteArray()
-        )
+        val validEntryFile =
+            MockMultipartFile(
+                "file",
+                "EntryFile.txt",
+                "text/plain",
+                this::class.java.getResourceAsStream("/input/brokenEntryFile.txt")!!.bufferedReader().readText()
+                    .toByteArray(),
+            )
 
         queueSuccessfulIPApiResponse()
 
         mockMvc.perform(
-            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA),
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Incorrect format found"))
 
@@ -114,21 +119,23 @@ class IntegrationTest {
                 it.timeLapsed shouldBeLessThan 8000
             }
         }
-
     }
 
     @Test
     fun `misnamed input entry file should return incorrect format 422 error`() {
-        val validEntryFile = MockMultipartFile(
-            "file", "Yo.txt", "text/plain",
-            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
-                .toByteArray()
-        )
+        val validEntryFile =
+            MockMultipartFile(
+                "file",
+                "Yo.txt",
+                "text/plain",
+                this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                    .toByteArray(),
+            )
 
         queueSuccessfulIPApiResponse()
 
         mockMvc.perform(
-            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA),
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Invalid file name provided"))
 
@@ -149,16 +156,19 @@ class IntegrationTest {
 
     @Test
     fun `invalid input entry file should return incorrect format 422 error`() {
-        val validEntryFile = MockMultipartFile(
-            "file", "EntryFile.txt", "text/plain",
-            this::class.java.getResourceAsStream("/input/invalidEntryFile.txt")!!.bufferedReader().readText()
-                .toByteArray()
-        )
+        val validEntryFile =
+            MockMultipartFile(
+                "file",
+                "EntryFile.txt",
+                "text/plain",
+                this::class.java.getResourceAsStream("/input/invalidEntryFile.txt")!!.bufferedReader().readText()
+                    .toByteArray(),
+            )
 
         queueSuccessfulIPApiResponse()
 
         mockMvc.perform(
-            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA),
         ).andExpect(status().isUnprocessableEntity)
             .andExpect(content().string("Format must follow [Likes] [Something]"))
 
@@ -179,16 +189,19 @@ class IntegrationTest {
 
     @Test
     fun `blocked ISP should return 403 error`() {
-        val validEntryFile = MockMultipartFile(
-            "file", "EntryFile.txt", "text/plain",
-            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
-                .toByteArray()
-        )
+        val validEntryFile =
+            MockMultipartFile(
+                "file",
+                "EntryFile.txt",
+                "text/plain",
+                this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                    .toByteArray(),
+            )
 
         queueBlockedISPApiResponse()
 
         mockMvc.perform(
-            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA),
         ).andExpect(status().isForbidden)
             .andExpect(content().string("Request ISP is blocked"))
 
@@ -209,16 +222,19 @@ class IntegrationTest {
 
     @Test
     fun `blocked country should return 403 error`() {
-        val validEntryFile = MockMultipartFile(
-            "file", "EntryFile.txt", "text/plain",
-            this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
-                .toByteArray()
-        )
+        val validEntryFile =
+            MockMultipartFile(
+                "file",
+                "EntryFile.txt",
+                "text/plain",
+                this::class.java.getResourceAsStream("/input/validEntryFile.txt")!!.bufferedReader().readText()
+                    .toByteArray(),
+            )
 
         queueBlockedCountryApiResponse()
 
         mockMvc.perform(
-            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA)
+            multipart("/processFile").file(validEntryFile).contentType(MediaType.MULTIPART_FORM_DATA),
         ).andExpect(status().isForbidden)
             .andExpect(content().string("Request Country is blocked"))
 
@@ -273,8 +289,6 @@ class IntegrationTest {
         }
     }
 
-
-
     companion object {
         private val wiremock = WireMockServer(options().dynamicPort())
         private val databaseContainer = MySQLContainer("mysql:8.3.0").withDatabaseName("assessment")
@@ -303,5 +317,3 @@ class IntegrationTest {
         }
     }
 }
-
-

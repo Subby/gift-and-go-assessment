@@ -6,7 +6,7 @@ private const val DEFAULT_PROCESSED_FILE_NAME = "OutcomeFile.json"
 
 sealed interface FileProcessResult
 
-data class FileProcessSuccess(val fileName: String = DEFAULT_PROCESSED_FILE_NAME, val inputStream: InputStreamResource):
+data class FileProcessSuccess(val fileName: String = DEFAULT_PROCESSED_FILE_NAME, val inputStream: InputStreamResource) :
     FileProcessResult
 
-data class FileProcessError(val errors: List<String>): FileProcessResult
+data class FileProcessError(val errors: List<String>) : FileProcessResult

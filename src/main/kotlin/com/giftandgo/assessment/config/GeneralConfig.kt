@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Primary
 @EnableConfigurationProperties(ApplicationConfigProps::class)
 @Configuration
 class GeneralConfig {
-
     @Primary
     @Bean
     fun csvObjectMapper(): ObjectMapper {
@@ -24,5 +23,4 @@ class GeneralConfig {
         mapper.registerModule(KotlinModule())
         return mapper
     }
-
 }

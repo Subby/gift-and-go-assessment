@@ -9,5 +9,5 @@ import org.springframework.boot.with
 class TestAssessmentApplication
 
 fun main(args: Array<String>) {
-	fromApplication<AssessmentApplication>().with(TestAssessmentApplication::class).run(*args)
+    fromApplication<AssessmentApplication>().with(TestAssessmentApplication::class).run(*args)
 }

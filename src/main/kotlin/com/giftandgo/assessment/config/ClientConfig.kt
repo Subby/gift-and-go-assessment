@@ -9,12 +9,10 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 
 @Configuration
 class ClientConfig(val applicationConfigProps: ApplicationConfigProps) {
-
     @Bean
     fun ipApiClient(): IPApiClient {
         val webClient = WebClient.builder().baseUrl(applicationConfigProps.ipApiUrl).build()
         return HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient)).build().createClient(IPApiClient::class.java)
     }
-
 }

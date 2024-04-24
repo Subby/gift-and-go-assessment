@@ -2,8 +2,11 @@ package com.giftandgo.assessment.service.fileprocessing
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.giftandgo.assessment.config.ApplicationConfigProps
-import com.giftandgo.assessment.model.*
-import com.giftandgo.assessment.model.fileprocessing.*
+import com.giftandgo.assessment.model.fileprocessing.EntryFile
+import com.giftandgo.assessment.model.fileprocessing.FileProcessError
+import com.giftandgo.assessment.model.fileprocessing.FileProcessResult
+import com.giftandgo.assessment.model.fileprocessing.FileProcessSuccess
+import com.giftandgo.assessment.model.fileprocessing.entryFileCsvSchema
 import io.konform.validation.Invalid
 import io.konform.validation.Valid
 import org.springframework.beans.factory.annotation.Qualifier
@@ -25,12 +28,14 @@ class EntryFileProcessorService(
             return FileProcessError(errors = listOf("Invalid file name provided"))
         }
         try {
-            val entryFileValues = csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
-                .readValues<EntryFile>(file.bytes).readAll()
+            val entryFileValues =
+                csvObjectMapper.readerFor(EntryFile::class.java).with(entryFileCsvSchema())
+                    .readValues<EntryFile>(file.bytes).readAll()
 
             if (applicationConfigProps.enableEntryFileValidation) {
-                val (validEntryFies, invalidEntryFiles) = entryFileValues.map { it.validateEntryFile() }
-                    .partition { it is Valid }
+                val (validEntryFies, invalidEntryFiles) =
+                    entryFileValues.map { it.validateEntryFile() }
+                        .partition { it is Valid }
 
                 if (invalidEntryFiles.isNotEmpty()) {
                     val invalidEntryFileValidationMessages =
@@ -40,26 +45,27 @@ class EntryFileProcessorService(
                 }
 
                 return FileProcessSuccess(
-                    inputStream = InputStreamResource(
-                        ByteArrayInputStream(
-                            jsonObjectMapper.writeValueAsBytes(
-                                validEntryFies.map { it as Valid }.map { it.value.toDataFile() }
-                            )
-                        )
-                    )
+                    inputStream =
+                        InputStreamResource(
+                            ByteArrayInputStream(
+                                jsonObjectMapper.writeValueAsBytes(
+                                    validEntryFies.map { it as Valid }.map { it.value.toDataFile() },
+                                ),
+                            ),
+                        ),
                 )
             } else {
                 return FileProcessSuccess(
-                    inputStream = InputStreamResource(
-                        ByteArrayInputStream(
-                            jsonObjectMapper.writeValueAsBytes(
-                                entryFileValues.map { it.toDataFile() }
-                            )
-                        )
-                    )
+                    inputStream =
+                        InputStreamResource(
+                            ByteArrayInputStream(
+                                jsonObjectMapper.writeValueAsBytes(
+                                    entryFileValues.map { it.toDataFile() },
+                                ),
+                            ),
+                        ),
                 )
             }
-
         } catch (exception: Exception) {
             return FileProcessError(errors = listOf("Incorrect format found"))
         }
