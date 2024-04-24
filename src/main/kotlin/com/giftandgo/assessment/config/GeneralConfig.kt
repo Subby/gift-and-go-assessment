@@ -14,8 +14,8 @@ class GeneralConfig {
 
     @Primary
     @Bean
-    fun csvObjectMapper(): ObjectMapper  {
-       return CsvMapper().registerModule(KotlinModule())
+    fun csvObjectMapper(): ObjectMapper {
+        return CsvMapper().registerModule(KotlinModule())
     }
 
     @Bean

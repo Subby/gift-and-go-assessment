@@ -1,8 +1,8 @@
 package com.giftandgo.assessment.controller
 
-import com.giftandgo.assessment.model.FileProcessError
-import com.giftandgo.assessment.model.FileProcessSuccess
-import com.giftandgo.assessment.service.FileProcessorService
+import com.giftandgo.assessment.model.fileprocessing.FileProcessError
+import com.giftandgo.assessment.model.fileprocessing.FileProcessSuccess
+import com.giftandgo.assessment.service.fileprocessing.FileProcessorService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller

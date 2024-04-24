@@ -1,0 +1,14 @@
+{
+  "query": "127.0.0.1",
+  "status": "success",
+  "country": "United Kingdom",
+  "countryCode": "GB",
+  "region": "ENG",
+  "regionName": "England",
+  "city": "Hayes",
+  "zip": "UB4",
+  "lat": 51.5158,
+  "lon": -0.4234,
+  "timezone": "Europe/London",
+  "isp": "Sky"
+}
